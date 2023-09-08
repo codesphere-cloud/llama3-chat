@@ -2,7 +2,7 @@ prepare:
   # Put your commands here.
   steps:
   - name: "Build Llama Cpp"
-    command: "make" 
+    command: "make clean && make -j" 
   - name: "Download model"
     command: "wget -P /home/user/app/models https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q5_K_M.gguf"   
 
