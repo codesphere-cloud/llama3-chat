@@ -5,7 +5,7 @@ Forked from [llama.cpp](https://github.com/ggerganov/llama.cpp) to run Llama2 in
 The CI pipeline is configured to fetch a pre-converted and quantized llama code instruct model from TheBloke from [huggingface](https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF) and run the http server example, README with config options can be found in the /examples/server directory. 
 
 ## Run on CPU
-If your workspace doesn't have a gpu update the ci pipeline as follows:
+If your workspace doesn't have a GPU update the CI pipeline as follows:
 
 Stage 1: Prepare
   - name: Build Llama Cpp  
