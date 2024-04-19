@@ -1,31 +1,26 @@
 prepare:
-  # Put your commands here.
   steps:
-    - name: "Clean"
-      command: "make clean"
-    - name: "Build Llama Cpp"
-      command: "if [ -v NV_LIBCUBLAS_VERSION ];
-        then echo 'Make for gpu'
-          && LLAMA_CUBLAS=1 make; 
-        else echo 'Make for cpu'
-          && make; 
-        fi"
-    - name: "Download model"
-      command: "wget -P /home/user/app/models https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q5_K_M.gguf"
-
+    - name: Clone repository
+      command: git clone https://github.com/ggerganov/llama.cpp.git | (cd llama.cpp ;
+        git pull)
+    - name: Clean
+      command: cd llama.cpp && make clean
+    - name: Build Llama Cpp
+      command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Make for
+        gpu' && LLAMA_CUDA=1 make; else echo 'Make for cpu' && make; fi
+    - name: Download model
+      command: "[ -f
+        /home/user/app/llama.cpp/models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf ]
+        || wget -P /home/user/app/llama.cpp/models
+        https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resol\
+        ve/main/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
 test:
-  # Put your commands here.
-  steps:
-    - name: "Unit Tests"
-      command: ""
-
+  steps: []
 run:
-  # Put your commands here.
   steps:
-    - name: "Run"
-      command: "if [ -v NV_LIBCUBLAS_VERSION ];
-        then echo 'Starting gpu server'
-          && ./server -m ./models/codellama-7b-instruct.Q5_K_M.gguf -c 2048 --port 3000 --host 0.0.0.0 -ngl 35;
-        else echo 'Starting cpu server'
-          &&  ./server -m ./models/codellama-7b-instruct.Q5_K_M.gguf -c 2048 --port 3000 --host 0.0.0.0; 
-        fi"
+    - name: Run
+      command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Starting gpu
+        server' && ./server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c
+        2048 --port 3000 --host 0.0.0.0 -ngl 35; else echo 'Starting cpu server'
+        &&  ./server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c 2048
+        --port 3000 --host 0.0.0.0; fi
