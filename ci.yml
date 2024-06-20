@@ -20,7 +20,7 @@ run:
   steps:
     - name: Run
       command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Starting gpu
-        server' && ./server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c
+        server' && ./llama-server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c
         2048 --port 3000 --host 0.0.0.0 -ngl 35; else echo 'Starting cpu server'
-        &&  ./server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c 2048
+        &&  ./llama-server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c 2048
         --port 3000 --host 0.0.0.0; fi
