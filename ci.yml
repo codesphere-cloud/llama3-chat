@@ -10,17 +10,18 @@ prepare:
         gpu' && LLAMA_CUDA=1 make; else echo 'Make for cpu' && make; fi
     - name: Download model
       command: "[ -f
-        /home/user/app/llama.cpp/models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf ]
+        /home/user/app/llama.cpp/models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf ]
         || wget -P /home/user/app/llama.cpp/models
-        https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/resol\
-        ve/main/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
+        https://huggingface.co/lmstudio-community/Meta-Llama-3.1-8B-Instruct-GG\
+        UF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
 test:
   steps: []
 run:
   steps:
     - name: Run
       command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Starting gpu
-        server' && ./llama-server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c
-        2048 --port 3000 --host 0.0.0.0 -ngl 35; else echo 'Starting cpu server'
-        &&  ./llama-server -m ./models/Meta-Llama-3-8B-Instruct.Q4_K_M.gguf -c 2048
-        --port 3000 --host 0.0.0.0; fi
+        server' && ./llama-server -m
+        ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c 30000 --port 3000
+        --host 0.0.0.0 -ngl 35; else echo 'Starting cpu server'
+        &&  ./llama-server -m ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c
+        30000 --port 3000 --host 0.0.0.0 -t 8; fi
