@@ -5,12 +5,10 @@ prepare:
         git pull)
     - name: Install Cmake
       command: nix-env -iA nixpkgs.cmakeMinimal        
-    - name: Clean
-      command: cd llama.cpp && cmake --build build --target clean
     - name: Build Llama Cpp
       command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Make for
         gpu' && cmake -B build -DGGML_CUDA=ON && cmake --build build --config
-        Release; else echo 'Make for cpu' && cmake -B build && cmake --build
+        Release; else echo 'Make for cpu' && cmake --build
         build --config Release -j 8 ; fi
     - name: Download model
       command: "[ -f
