@@ -3,11 +3,15 @@ prepare:
     - name: Clone repository
       command: git clone https://github.com/ggerganov/llama.cpp.git | (cd llama.cpp ;
         git pull)
+    - name: Install Cmake
+      command: nix-env -iA nixpkgs.cmakeMinimal        
     - name: Clean
-      command: cd llama.cpp && make clean
+      command: cd llama.cpp && cmake --build build --target clean
     - name: Build Llama Cpp
       command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Make for
-        gpu' && LLAMA_CUDA=1 make; else echo 'Make for cpu' && make; fi
+        gpu' && cmake -B build -DGGML_CUDA=ON && cmake --build build --config
+        Release; else echo 'Make for cpu' && cmake -B build && cmake --build
+        build --config Release -j 8 ; fi
     - name: Download model
       command: "[ -f
         /home/user/app/llama.cpp/models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf ]
@@ -20,8 +24,9 @@ run:
   steps:
     - name: Run
       command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Starting gpu
-        server' && ./llama-server -m
+        server' && ./build/bin/llama-server -m
         ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c 30000 --port 3000
         --host 0.0.0.0 -ngl 35; else echo 'Starting cpu server'
-        &&  ./llama-server -m ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c
-        30000 --port 3000 --host 0.0.0.0 -t 8; fi
+        &&  ./build/bin/llama-server -m
+        ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c 30000 --port 3000
+        --host 0.0.0.0 -t 8; fi
