@@ -1,3 +1,4 @@
+schemaVersion: v0.2
 prepare:
   steps:
     - name: Clone repository
@@ -8,23 +9,36 @@ prepare:
     - name: Build Llama Cpp
       command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Make for
         gpu' && cmake -B build -DGGML_CUDA=ON && cmake --build build --config
-        Release; else echo 'Make for cpu' && cmake -B build -DLLAMA_CURL=OFF && cmake --build
-        build --config Release -j 8 ; fi
+        Release; else echo 'Make for cpu' && cmake -B build -DLLAMA_CURL=OFF &&
+        cmake --build build --config Release -j 8 ; fi
     - name: Download model
-      command: "[ -f
-        /home/user/app/llama.cpp/models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf ]
-        || wget -P /home/user/app/llama.cpp/models
-        https://huggingface.co/lmstudio-community/Meta-Llama-3.1-8B-Instruct-GG\
-        UF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+      command: MODEL_URL="https://huggingface.co/lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf";
+        if [ -n "$HF_GGUF_URL" ]; then MODEL_URL="$HF_GGUF_URL"; fi;
+        MODEL_FILENAME=$(basename "$MODEL_URL"); [ -f
+        /home/user/app/llama.cpp/models/"$MODEL_FILENAME" ] || wget -P
+        /home/user/app/llama.cpp/models "$MODEL_URL"
 test:
   steps: []
 run:
-  steps:
-    - name: Run
-      command: cd llama.cpp && if [ -v NV_LIBCUBLAS_VERSION ]; then echo 'Starting gpu
-        server' && ./build/bin/llama-server -m
-        ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c 30000 --port 3000
-        --host 0.0.0.0 -ngl 35; else echo 'Starting cpu server'
-        &&  ./build/bin/llama-server -m
-        ./models/Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf -c 30000 --port 3000
-        --host 0.0.0.0 -t 8; fi
+  app:
+    steps:
+      - name: Run
+        command: if [ -n "$HF_GGUF_URL" ]; then MODEL_FILE_REF=$(basename
+          "$HF_GGUF_URL"); else
+          MODEL_FILE_REF="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"; fi;
+          MODEL_PATH="./models/$MODEL_FILE_REF"; cd llama.cpp && if [ -v
+          NV_LIBCUBLAS_VERSION ]; then echo 'Starting gpu server' &&
+          ./build/bin/llama-server -m $MODEL_PATH -c 30000 --port 3000 --host
+          0.0.0.0 -ngl 35; else echo 'Starting cpu server' &&
+          ./build/bin/llama-server -m $MODEL_PATH -c 30000 --port 3000 --host
+          0.0.0.0 -t 8; fi
+    plan: 21
+    replicas: 1
+    network:
+      ports:
+        - port: 3000
+          isPublic: false
+      paths:
+        - port: 3000
+          path: /
+          stripPath: false
